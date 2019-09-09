@@ -4,7 +4,7 @@
 // 系统安卓7及以上   
 // Auto.js 版本4.1及以上
 // 依赖同路径下的 "解锁屏幕.js" 来在屏幕锁定时解锁屏幕
-// 更新日期:20190808
+// 更新日期:20190909
 //如果脚本无法在后台申请截屏权限或无法在非主界面调用时弹出询问窗,请确保有后台弹出界面的权限
 
 // TODO  协同tasker  自动设定下一个任务时间
@@ -12,10 +12,9 @@
 var debugMode = false
 // var debugMode = true
 
-launchApp('Auto.js')
-//requiresApi(24)
-//requiresAutojsVersion('4.0.9')
-//auto()
+requiresApi(24)
+requiresAutojsVersion('4.0.9')
+auto()
 requestScreenCapture()
 
 var deviceUnlocker = require('解锁屏幕.js')

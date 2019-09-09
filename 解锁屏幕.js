@@ -43,28 +43,28 @@ deviceUnlocker.unlockDevice = function () {
         desc(password[i]).findOne(10000).click()
       }
     }
-
-    // 返回桌面 解锁结束
-    sleep(1000)
-    for (var i = 0; i < 10; i++) {
-      if (currentActivity() != 'com.miui.home.launcher.Launcher') {
-        log('returning home')
-        home()
-        sleep(200)
-      }
-    }
-
-    if (currentActivity() == 'com.miui.home.launcher.Launcher') {
-      toastLog('device unlocked')
-      return true
-    } else {
-      return false
-    }
   }
-  else{
+  else {
     log('Screen Already On')
-    return 'Screen Already On'
   }
+
+  // 返回桌面 解锁结束
+  sleep(1000)
+  for (var i = 0; i < 10; i++) {
+    if (currentActivity() != 'com.miui.home.launcher.Launcher') {
+      log('returning home')
+      home()
+      sleep(200)
+    }
+  }
+
+  if (currentActivity() == 'com.miui.home.launcher.Launcher') {
+    toastLog('device unlocked')
+    return true
+  } else {
+    return false
+  }
+
 }
 
 module.exports = deviceUnlocker
