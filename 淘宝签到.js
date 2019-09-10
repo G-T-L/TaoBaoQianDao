@@ -127,7 +127,8 @@ function taoBaoQianDao() {
         console.log('如非1920x1080分辨率 请自行修正坐标  推荐使用此图标的截图进行匹配')
         click(980, 1100)//点击领水滴
       }*/
-      smartClick(text('领水滴').findOne(1000))//淘宝更新之后这个控件有名称了  
+      //smartClick(text('领水滴').findOne(1000))//淘宝更新之后这个控件有名称了  
+      click(text('偷金币').findOne(1000).bounds().centerX(), text('偷金币').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
       sleep(3000)
       if (className('android.view.View').text('领水滴').exists()) {
         smartClick(text('打卡').findOne(1000))
@@ -148,14 +149,18 @@ function taoBaoQianDao() {
     if (1) {//方便折叠和调试
       swipe(540, 500, 540, 1500, 500)
       sleep(1000)
-      toastLog('开始偷金币')
-      smartClick(text('偷金币').findOne(1000))//淘宝更新之后这个控件有名称了
+      //smartClick(text('偷金币').findOne(1000))//淘宝更新之后这个控件有名称了,但是虽然clickable为true调用click依旧没反应
+      click(text('偷金币').findOne(1000).bounds().centerX(), text('偷金币').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
       sleep(3000)
       //区分text同为偷金币的按钮与标题
+
+      //这个弹出界面不需要下拉显示出来就能索引到全部控件  故先把列表全部展开  再依次点击
       if (className('android.view.View').text('偷金币').exists()) {
         if (textContains('好友可偷金币').exists()) {
           smartClick(textContains('好友可偷金币').findOne(2000))
         }
+
+        toastLog('开始浇水')
         while (text('可浇水').exists()) {
           smartClick(text('可浇水').findOne(1000))
           sleep(5000)
@@ -169,7 +174,9 @@ function taoBaoQianDao() {
 
         //根据android.widget.Button这一className区分偷金币的标题
         //根据depth区分是不是展开列表里的偷金币控件
-        for (i = 15; i < 30; i++) {
+        //如果启用稳定模式则因省略部分布局两个depth均相应减小,需更改范围
+        toastLog('开始偷金币')
+        for (i = 12; i < 30; i++) {
           if (className('android.widget.Button').text('偷金币').depth(i).exists()) {
             smartClick(className('android.widget.Button').text('偷金币').depth(i).findOne(1000))
             sleep(5000)
