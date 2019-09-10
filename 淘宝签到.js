@@ -128,7 +128,7 @@ function taoBaoQianDao() {
         click(980, 1100)//点击领水滴
       }*/
       //smartClick(text('领水滴').findOne(1000))//淘宝更新之后这个控件有名称了  
-      click(text('偷金币').findOne(1000).bounds().centerX(), text('偷金币').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
+      click(text('领水滴').findOne(1000).bounds().centerX(), text('领水滴').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
       sleep(3000)
       if (className('android.view.View').text('领水滴').exists()) {
         smartClick(text('打卡').findOne(1000))
