@@ -2,10 +2,10 @@
 // 仍在改进中 更新可去 https://github.com/G-T-L
 // 要求:
 // 系统安卓7及以上   
-// Auto.js 版本4.1及以上
+// Auto.js 版本4.1及以上 否则部分函数无法运行
 // 依赖同路径下的 "解锁屏幕.js" 来在屏幕锁定时解锁屏幕
-// 更新日期:20190909
-//如果脚本无法在后台申请截屏权限或无法在非主界面调用时弹出询问窗,请确保有后台弹出界面的权限
+// 更新日期:201909013
+// 如果脚本无法在后台申请截屏权限或无法在非主界面调用时弹出询问窗,请确保有后台弹出界面的权限
 
 // TODO  协同tasker  自动设定下一个任务时间
 
@@ -60,27 +60,9 @@ function taoBaoQianDao() {
 
     //收水滴和收金币
     if (1) {//方便折叠和调试
-      toastLog('开始收水滴')
-      // 收水滴
-      swipe(540, 500, 540, 1500, 500)
-      sleep(1000)
-      var point = findColor(captureScreen(), '#ff0084FE', {
-        region: [200, 300, 600, 500]
-      })
-      var count = 0
-      while (point && count++ < 3) {
-        toastLog('水滴已定位')
-
-        Tap(point.x, point.y - 10, 10)
-        sleep(3000)
-        swipe(540, 500, 540, 1500, 500) //
-        sleep(1000)
-        point = findColor(captureScreen(), '#ff0084FE', {
-          region: [200, 300, 600, 500]
-        })
-      }
 
       // 点击金币位置 坐标视分辨率不同适当调整
+      toastLog('开始领金币')
       // click(400, 750)
       sleep(1000)
       swipe(540, 500, 540, 1500, 500)
@@ -99,6 +81,25 @@ function taoBaoQianDao() {
         sleep(3000)
       }
       sleep(1500)
+
+      toastLog('开始收水滴')
+      // 收水滴
+      swipe(540, 500, 540, 1500, 500)
+      sleep(1000)
+      var point = findColor(captureScreen(), '#ff0084FE', {
+        region: [200, 300, 600, 500]
+      })
+      var count = 0
+      while (point && count++ < 3) {
+        toastLog('水滴已定位')
+        Tap(point.x, point.y - 10, 10)
+        sleep(3000)
+        swipe(540, 500, 540, 1500, 500) //
+        sleep(1000)
+        point = findColor(captureScreen(), '#ff0084FE', {
+          region: [200, 300, 600, 500]
+        })
+      }
 
       // 领打卡后的额外红包 (好像现在好久没出现过了)
       if (className('android.view.View').desc('领').exists()) {
@@ -199,6 +200,8 @@ function taoBaoQianDao() {
       }
       //end of 偷金币和浇水
 
+      //这个是金币庄园左侧的种宝贝  如果开通了就自己截个图扣个图标包出来就能运行了
+      //但我现在没开通  无法调试  不确定是否还能使用  请自行修改
       if (files.exists('图标包/领肥料图标.png')) {
         var img = images.read('图标包/领肥料图标.png')
         var p = images.findImage(captureScreen(), img)
@@ -262,7 +265,6 @@ function taoBaoQianDao() {
 
     var storage = storages.create('virtualLog') // 本地存储数据库 存储最近一次脚本运行的日期 因今日任务等每天只需点击一次 故如已运行过则跳过 
     if (storage.get('taoBaoQianDaoLastRanDate') != new Date().getDate() || debugMode) {
-
 
       //福利中心抽奖
       if (1) {//方便折叠和调试
@@ -336,6 +338,7 @@ function taoBaoQianDao() {
       }
 
       // TODO:庄园大奖赛签到
+      // 现在好一阵子没见过了 不确定以前写的还行不行  等以后有了再看看能不能用吧
       if (files.exists('图标包/大奖赛图标.png')) {
         var img = images.read('图标包/大奖赛图标.png')
         var p = images.findImage(captureScreen(), img)
@@ -362,8 +365,8 @@ function taoBaoQianDao() {
           console.warn('未找到庄园大奖赛入口')
         }
       }
-      // 今日任务奖励领取
 
+      // 今日任务奖励领取
       if (files.exists('图标包/今日任务图标.png')) {
         var img = images.read('图标包/今日任务图标.png')
         var p = images.findImage(captureScreen(), img)
@@ -390,7 +393,7 @@ function taoBaoQianDao() {
               sleep(1000)
             }
 
-            //TODO 搜索商品得金币
+            //搜索商品得金币
             //会影响淘宝的推荐 算了吧
 
             // 浏览活动
@@ -401,7 +404,7 @@ function taoBaoQianDao() {
               sleep(3000)
             }
 
-            // 拍照识别赚金币   //TODO  黑暗环境下改用相册
+            // 拍照识别赚金币   
             if (desc('拍照识别赚金币').exists()) {
               smartClick(desc('拍照识别赚金币').findOne(1000))
               sleep(5000)

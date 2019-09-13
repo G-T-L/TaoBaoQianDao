@@ -1,7 +1,7 @@
 // 密码按照这个格式自行修改 
 // var password = [5, 9, 6, 2]
 var password = [4, 3, 5, 4, 3, 5]
-const isRooted = true
+//const isRooted = true
 
 var deviceUnlocker = {}
 deviceUnlocker.unlockDevice = function () {
@@ -23,12 +23,10 @@ deviceUnlocker.unlockDevice = function () {
       sleep(100)
     }
 
-    if (isRooted) {
-      Swipe(540, 1800, 540, 300, 100) // 大写为root函数 小写的swipe无法成功滑动  //米8为上滑
-      for (var i = 0; i < password.length; i++) {
-        desc(password[i]).findOne(10000).click()
-      }
-    } else {
+    //先假设有root权限,上滑到密码输入页
+    Swipe(540, 1800, 540, 300, 100) // 大写为root函数 小写的swipe无法成功滑动  //米8为上滑  //当屏幕有干扰时(比如屏幕朝下放在床上等) 上滑会失败
+    if (!desc(0).findOne(10000)) {
+      //如果失败 尝试另一种方式
       // 非root模式 普通swipe下滑失效 采用下滑通知栏点击设置进入密码输入页面进行曲线解锁
       swipe(540, 10, 540, 1500, 600)
       sleep(500) // 要等通知栏下滑加载完成后定位
@@ -39,10 +37,13 @@ deviceUnlocker.unlockDevice = function () {
         swipe(540, 10, 540, 1500, 200)
       }
       desc('设置').findOne(2000).click()
-      for (var i = 0; i < password.length; i++) {
-        desc(password[i]).findOne(10000).click()
-      }
     }
+
+    //输入密码
+    for (var i = 0; i < password.length; i++) {
+      desc(password[i]).findOne(10000).click()
+    }
+
   }
   else {
     log('Screen Already On')
