@@ -6,6 +6,7 @@
 // 依赖同路径下的 "解锁屏幕.js" 来在屏幕锁定时解锁屏幕
 // 更新日期:201909013
 // 如果脚本无法在后台申请截屏权限或无法在非主界面调用时弹出询问窗,请确保有后台弹出界面的权限
+// 脚本稳定性基于Auto.js 偶尔会出现找图找色失败而导致无法领取水滴,无法进入今日任务,玩小游戏等拓展频道领取金币
 
 // TODO  协同tasker  自动设定下一个任务时间
 
@@ -80,7 +81,7 @@ function taoBaoQianDao() {
         back()
         sleep(3000)
       }
-      sleep(1500)
+      sleep(5000)
 
       toastLog('开始收水滴')
       // 收水滴
@@ -100,6 +101,8 @@ function taoBaoQianDao() {
           region: [200, 300, 600, 500]
         })
       }
+      toastLog('收水滴已结束')
+      sleep(1000)
 
       // 领打卡后的额外红包 (好像现在好久没出现过了)
       if (className('android.view.View').desc('领').exists()) {
@@ -110,6 +113,7 @@ function taoBaoQianDao() {
 
     //领水滴
     if (1) {//方便折叠和调试
+      toastLog('开始领水滴')
       swipe(540, 500, 540, 1500, 500)
       sleep(1000)
       /*
@@ -142,7 +146,8 @@ function taoBaoQianDao() {
           }
         }
         smartClick(text('关闭').findOne(1000))//关闭领水滴界面
-        sleep(3000)
+      toastLog('领水滴已结束')
+      sleep(3000)
       }
     }//end of 领水滴
 
@@ -172,6 +177,8 @@ function taoBaoQianDao() {
           back()
           sleep(3000)
         }
+        toastLog('浇水已结束')
+        sleep(1000)
 
         //根据android.widget.Button这一className区分偷金币的标题
         //根据depth区分是不是展开列表里的偷金币控件
@@ -190,8 +197,9 @@ function taoBaoQianDao() {
             i = 15
           }
         }
-
+        toastLog('偷金币已结束')
         sleep(1000)
+
         smartClick(text('关闭').findOne(1000))//关闭偷金币界面
         //click(1000, 500)
         sleep(3000)
