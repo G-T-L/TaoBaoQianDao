@@ -146,8 +146,8 @@ function taoBaoQianDao() {
           }
         }
         smartClick(text('关闭').findOne(1000))//关闭领水滴界面
-      toastLog('领水滴已结束')
-      sleep(3000)
+        toastLog('领水滴已结束')
+        sleep(3000)
       }
     }//end of 领水滴
 
@@ -438,6 +438,14 @@ function taoBaoQianDao() {
             if (desc('走路赚金币').exists()) {
               smartClick(desc('走路赚金币').findOne(1000))
               sleep(13000) // 其实只需5s  但此界面加载缓慢
+              back()
+              sleep(3000)
+            }
+
+            // 聚划算
+            if (desc('浏览聚划算抵扣好货').exists()) {
+              smartClick(desc('浏览聚划算抵扣好货').findOne(1000))
+              sleep(13000)
               back()
               sleep(3000)
             }
