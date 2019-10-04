@@ -8,9 +8,13 @@
 // 如果脚本无法在后台申请截屏权限或无法在非主界面调用时弹出询问窗,请确保有后台弹出界面的权限
 // 脚本稳定性基于Auto.js 偶尔会出现找图找色失败而导致无法领取水滴,无法进入今日任务,玩小游戏等拓展频道领取金币
 
-// TODO  协同tasker  自动设定下一个任务时间
+// TODO  完善github的readme
+// TODO  各模块函数化
+// TODO  无root权限测试
+// TODO  清空/覆盖剪切板 防止可能复制的商品链接弹窗干扰
 
 var debugMode = false
+var emailAddress = "673193983@qq.com"
 // var debugMode = true
 
 requiresApi(24)
@@ -81,7 +85,9 @@ function taoBaoQianDao() {
         back()
         sleep(3000)
       }
-      sleep(5000)
+
+      if (!findColor(captureScreen(), '#ff0084FE', { region: [200, 300, 600, 500] }))
+        sleep(5000)//如果找不到水滴 则可能是收货果实的动画或弹窗提示等未消失 多等等
 
       toastLog('开始收水滴')
       // 收水滴
@@ -146,8 +152,8 @@ function taoBaoQianDao() {
           }
         }
         smartClick(text('关闭').findOne(1000))//关闭领水滴界面
-      toastLog('领水滴已结束')
-      sleep(3000)
+        toastLog('领水滴已结束')
+        sleep(3000)
       }
     }//end of 领水滴
 
@@ -275,7 +281,7 @@ function taoBaoQianDao() {
     if (storage.get('taoBaoQianDaoLastRanDate') != new Date().getDate() || debugMode) {
 
       //福利中心抽奖
-      if (1) {//方便折叠和调试
+      if (files.exists('图标包/玩小游戏图标.png')) {//方便折叠和调试
         toastLog('进入福利中心抽奖')
         var img = images.read('图标包/福利中心图标.png')
         if (img) {
@@ -288,6 +294,24 @@ function taoBaoQianDao() {
             console.warn('未找到福利中心入口,请检查图标包是否匹配')
           }
         } else {
+          app.startActivity({
+            packageName: "com.android.email",
+            className: "com.kingsoft.mail.compose.ComposeActivity",
+            data: emailAddress,
+            extras: {
+              subject: "图标包匹配失败",
+              body: "可能由于AutoJs识图模块崩溃导致(此时无法领水滴,无法进行玩小游戏,今日任务等附加模块),重启手机可解决~ " + "Autojs版本: " + app.autojs.versionName
+            }
+          });
+          /*
+          app.sendEmail({
+            email: emailAddress,
+            subject: "图标包匹配失败",
+            text: "可能由于AutoJs识图模块崩溃导致(此时无法领水滴,无法进行玩小游戏,今日任务等附加模块),重启手机可解决~"
+          });
+          smartClick(textContains('邮件').findOne(5000))
+          */
+          smartClick(id('compose_send_btn').findOne(5000))//成功打开对应邮件发送界面就发送   没打开就算了
           //如果淘宝更新界面有变动(时有时无的庄园大奖赛等),则此基于坐标的点击将发生错误,
           console.log('如非1920x1080分辨率 请自行修正坐标  推荐使用此图标的截图进行匹配')
           click(980, 1100)//点击福利中心的坐标
@@ -442,6 +466,14 @@ function taoBaoQianDao() {
               sleep(3000)
             }
 
+            // 聚划算
+            if (desc('浏览聚划算抵扣好货').exists()) {
+              smartClick(desc('浏览聚划算抵扣好货').findOne(1000))
+              sleep(13000)
+              back()
+              sleep(3000)
+            }
+
             // 进群打卡
             if (desc('进群打卡领金币').exists()) {
               smartClick(desc('进群打卡领金币').findOne(1000))
@@ -498,6 +530,7 @@ function taoBaoQianDao() {
       // } //end of 今日任务
     } else {
       toastLog('今日任务已完成,无需重复')
+      sleep(1000)
     }
     toast('淘宝签到已结束')
     sleep(2000)
@@ -515,11 +548,25 @@ function taoBaoQianDao() {
     if (isScreenNeedToBeLocked) {
       KeyCode(26)
     }
+    var config = storages.create('taoBaoQianDaoConfig') // 本地存储数据库 存储各项配置
+    var period = config.get('period', 4 * 60 + 10)
+    app.sendBroadcast({
+      action: "net.dinglisch.android.tasker.ActionCodes.RUN_SCRIPT",
+      extras: {
+        name: "淘宝签到",
+        time: period
+      }
+    });
+
     exit()
   }
 }
 
 function unlockAndEnterMainSession() {
+
+  //从本地存储数据库加载配置
+
+
   if (device.isScreenOn()) {
     isScreenNeedToBeLocked = false
     toastLog('Screen On')
@@ -527,21 +574,34 @@ function unlockAndEnterMainSession() {
       title: '是否开始淘宝签到?',
       positive: '确认',
       negative: '取消',
-      neutral: '稍后提醒',
+      neutral: '修改脚本运行间隔',
       checkBoxPrompt: '签到期间临时静音',
       checkBoxChecked: true
     }).on('any', (action, dialog) => {
+
       if (action == 'positive') {
         thread_main = threads.start(taoBaoQianDao())
-      } else if (action == 'negative') {
-        toast('此次签到已取消')
+      }
+      else if (action == 'negative') {
+        app.sendBroadcast({
+          action: "net.dinglisch.android.tasker.ActionCodes.RUN_SCRIPT",
+          extras: {
+            name: "淘宝签到",
+            time: 60
+          }
+        });
+        toast('此次签到已取消 下次签到将于一小时后进行')
         console.info('opration aborted mannually')
         exit()
-      } else if (action == 'neutral') {
-        var delayTime = dialogs.input('延时时间(min):', '4')
-        sleep(delayTime * 60 * 1000)
+      }
+      else if (action == 'neutral') {
+        var config = storages.create('taoBaoQianDaoConfig') // 本地存储数据库 存储各项配置
+        var period = config.get('period', 4 * 60 + 10)
+        period = dialogs.input('请输入下一次运行的间隔时间(min):', period)
+        config.put('period', period)
         unlockAndEnterMainSession()
       }
+
     }).on('check', (checked) => {
       // 监听勾选框   但无动作则不执行  即采用默认值
       muteWhileRunning = checked
@@ -683,4 +743,3 @@ function enterJinBiZhuangYuan() {
   return isLoadFinished
 }
 
-// TODO  代码逻辑重构  确保在正确的页面对正确的控件进行操作

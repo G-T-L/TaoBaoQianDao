@@ -17,7 +17,7 @@ deviceUnlocker.unlockDevice = function () {
   if (!device.isScreenOn()) {
     log('unlocking device')
     device.wakeUp()
-    sleep(100)
+    sleep(500)//有事点亮屏幕后会有个动画 这个时候划不动
     if (!device.isScreenOn()) {
       console.warn('error:  screen still off!!!')
       sleep(100)
