@@ -1,5 +1,5 @@
 // 密码按照这个格式自行修改 
-// var password = [5, 9, 6, 2]
+//var password = [5, 9, 6, 2]
 var password = [4, 3, 5, 4, 3, 5]
 //const isRooted = true
 
@@ -17,14 +17,15 @@ deviceUnlocker.unlockDevice = function () {
   if (!device.isScreenOn()) {
     log('unlocking device')
     device.wakeUp()
-    sleep(100)
+    sleep(1000)
     if (!device.isScreenOn()) {
       console.warn('error:  screen still off!!!')
-      sleep(100)
+      sleep(1000)
     }
 
     //先假设有root权限,上滑到密码输入页
-    Swipe(540, 1800, 540, 300, 100) // 大写为root函数 小写的swipe无法成功滑动  //米8为上滑  //当屏幕有干扰时(比如屏幕朝下放在床上等) 上滑会失败
+    Swipe(540, 1800, 540, 300, 200) //上滑 大写为root函数 小写的swipe无法成功滑动  //米8为上滑  //当屏幕有干扰时(比如屏幕朝下放在床上等) 上滑会失败
+    //Swipe(200, 1000, 900, 1000, 200) //右滑
     if (!desc(0).findOne(10000)) {
       //如果失败 尝试另一种方式
       // 非root模式 普通swipe下滑失效 采用下滑通知栏点击设置进入密码输入页面进行曲线解锁

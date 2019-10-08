@@ -16,7 +16,6 @@ var debugMode = false
 requiresApi(24)
 requiresAutojsVersion('4.0.9')
 auto()
-requestScreenCapture()
 
 var deviceUnlocker = require('解锁屏幕.js')
 var isScreenNeedToBeLocked
@@ -45,6 +44,9 @@ var thread_main_monitor = threads.start(function () {
 //主线程对应的调用函数
 function taoBaoQianDao() {
 
+  var thread_accessory=threads.start(function(){smartClick(text("立即开始").findOne(5000))})
+  requestScreenCapture()
+  
   var isLoadFinished = enterJinBiZhuangYuan()
   if (isLoadFinished) {
 
@@ -311,7 +313,7 @@ function taoBaoQianDao() {
           if (p) {
             toastLog('进入玩小游戏')
             click(p.x + img.getWidth() / 2, p.y + img.getHeight() / 2)
-            sleep(3000)
+            sleep(5000)
             if (text('金币游戏').exists()) {
               smartClick(text('签到').findOne(3000))
               sleep(5000)
