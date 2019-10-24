@@ -6,12 +6,14 @@
 // 依赖同路径下的 "解锁屏幕.js" 来在屏幕锁定时解锁屏幕
 // 更新日期:201909013
 // 如果脚本无法在后台申请截屏权限或无法在非主界面调用时弹出询问窗,请确保有后台弹出界面的权限
-// 脚本稳定性基于Auto.js 偶尔会出现找图找色失败而导致无法领取水滴,无法进入今日任务,玩小游戏等拓展频道领取金币
+// 脚本稳定性基于Auto.js 偶尔会出现找图找色失败而导致无法领取水滴,无法进入今日任务,玩小游戏等拓展频道领取金币 重启手机可解决
 
 // TODO  协同tasker  自动设定下一个任务时间
+// TODO  流程解耦 函数化
+// TODO  适配高分屏
+const IsRooted = files.exists("/sbin/su") || files.exists("/system/xbin/su") || files.exists("/system/bin/su")
+const debugMode = false
 
-var debugMode = false
-// var debugMode = true
 
 requiresApi(24)
 requiresAutojsVersion('4.0.9')
@@ -44,9 +46,9 @@ var thread_main_monitor = threads.start(function () {
 //主线程对应的调用函数
 function taoBaoQianDao() {
 
-  var thread_accessory=threads.start(function(){smartClick(text("立即开始").findOne(5000))})
+  var thread_accessory = threads.start(function () { smartClick(text("立即开始").findOne(5000)) })//如果没有root权限则需点击授权
   requestScreenCapture()
-  
+
   var isLoadFinished = enterJinBiZhuangYuan()
   if (isLoadFinished) {
 
@@ -95,7 +97,7 @@ function taoBaoQianDao() {
       var count = 0
       while (point && count++ < 3) {
         toastLog('水滴已定位')
-        Tap(point.x, point.y - 10, 10)
+        click(point.x, point.y - 10)
         sleep(3000)
         swipe(540, 500, 540, 1500, 500) //
         sleep(1000)
@@ -164,15 +166,18 @@ function taoBaoQianDao() {
 
       //这个弹出界面不需要下拉显示出来就能索引到全部控件  故先把列表全部展开  再依次点击
       if (className('android.view.View').text('偷金币').exists()) {
-        if (textContains('好友可偷金币').exists()) {
-          smartClick(textContains('好友可偷金币').findOne(2000))
+        while (textContains('个好友可偷金币').exists()) {
+          smartClick(textContains('个好友可偷金币').findOne(2000))
+          swipe(540, 1500, 540, 500, 500)
         }
 
         toastLog('开始浇水')
         while (text('可浇水').exists()) {
           smartClick(text('可浇水').findOne(1000))
           sleep(5000)
-          click(990, 920) // 点击浇水
+          click(text('浇水').findOne(1000).bounds().centerX(), text('浇水').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
+          //smartClick(text('浇水').findOne(1000))
+          //click(990, 920) // 点击浇水
           sleep(2000)
           smartClick(text('收下了').findOne(1000))
           sleep(100)
@@ -208,10 +213,12 @@ function taoBaoQianDao() {
       } else {
         enterJinBiZhuangYuan()
       }
-      //end of 偷金币和浇水
+    }//end of 偷金币和浇水
+
+    //种宝贝 施肥
+    if (1) {
 
       //这个是金币庄园左侧的种宝贝  如果开通了就自己截个图扣个图标包出来就能运行了
-      //但我现在没开通  无法调试  不确定是否还能使用  请自行修改
       if (files.exists('图标包/领肥料图标.png')) {
         var img = images.read('图标包/领肥料图标.png')
         var p = images.findImage(captureScreen(), img)
@@ -220,57 +227,72 @@ function taoBaoQianDao() {
           click(p.x + img.getWidth() / 2, p.y + img.getHeight() / 2)
           sleep(3000)
 
-          click(540, 600)
-          sleep(1000)
-          click(360, 600)
-          sleep(1000)
-          click(720, 600)
-          sleep(1000)
+        } else {
+          toast('未找到种宝贝入口 请检查是否已开通 及图标包是否匹配')
+          console.warn('未找到种宝贝入口 请检查是否已开通 及图标包是否匹配')
+        }
 
-          click(980, 1100)
-          sleep(3000)
-          if (text('领肥料').exists()) {
-            smartClick(text('打卡').findOne(1000))
-            sleep(1000)
+      }
+      else {
+        //直接点击个大概位置 很容易失败
+        click(250, 850)
+        sleep(3000)
+      }
+
+      //如果加载成功
+      if (textContains('领肥料').exists()) {
+
+        click(540, 600)
+        sleep(1000)
+        click(360, 600)
+        sleep(1000)
+        click(720, 600)
+        sleep(1000)
+
+        click(text('领肥料').findOne(1000).bounds().centerX(), text('领肥料').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
+        sleep(3000)
+        if (className('android.view.View').text('领肥料').exists()) {
+          smartClick(text('打卡').findOne(1000))
+          sleep(1000)
+          while (text('去逛逛').exists()) {
             if (smartClick(text('去逛逛').findOne(1000))) {
-              sleep(60000) // 45s is required
+              sleep(38000)
               back()
               sleep(3000)
             }
-            click(1000, 500)
-            sleep(3000)
           }
-
-          // 施肥
-          click(990, 920)
+          smartClick(text('关闭').findOne(1000))//关闭领肥料界面
           sleep(3000)
-          if (className('android.view.View').text('帮施肥').exists()) {
-            do {
-              while (text('去施肥').exists()) {
-                smartClick(text('去施肥').findOne(1000))
-                sleep(5000)
-                click(990, 920) // 点击施肥
-                sleep(1000)
-                back()
-                sleep(3000)
-              }
+        }
 
-              swipe(500, 1500, 500, 700, 500) // 上滑手势 下拉列表
-              smartClick(textContains('好友可施肥').findOne(2000)) // 点开下滑列表
-              sleep(1000)
-            } while (text('去施肥').exists() | textContains('好友可施肥').exists())
+        // 施肥
+        click(text('帮施肥').findOne(1000).bounds().centerX(), text('帮施肥').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
+        sleep(3000)
+        if (className('android.view.View').text('帮施肥').exists()) {
+          while (textContains('个好友可施肥').exists()) {
+            smartClick(textContains('个好友可施肥').findOne(2000))
+            swipe(540, 1500, 540, 500, 500)
+          }
+
+          while (text('去施肥').exists()) {
+            smartClick(text('去施肥').findOne(1000))
+            sleep(5000)
+            click(text('施肥').findOne(1000).bounds().centerX(), text('施肥').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
+            //click(990, 920) // 点击施肥
             sleep(1000)
-            click(1000, 500)
+            back()
             sleep(3000)
           }
 
-          // 重新载入
+          sleep(1000)
+          toastLog('领肥料已结束')
+          smartClick(text('关闭').findOne(1000))//关闭领肥料界面
+          sleep(3000)
 
-        } else {
-          toast('未找到种宝贝入口 请检查是否已开通')
-          console.warn('未找到种宝贝入口 请检查是否已开通')
         }
+
       }
+
     }// end of 种宝贝 施肥
 
     var storage = storages.create('virtualLog') // 本地存储数据库 存储最近一次脚本运行的日期 因今日任务等每天只需点击一次 故如已运行过则跳过 
@@ -314,16 +336,22 @@ function taoBaoQianDao() {
             toastLog('进入玩小游戏')
             click(p.x + img.getWidth() / 2, p.y + img.getHeight() / 2)
             sleep(5000)
+
+            if (text('授权').exists()) {
+              smartClick(text('授权').findOne(1000))
+              sleep(10000)
+            }
+
             if (text('金币游戏').exists()) {
               smartClick(text('签到').findOne(3000))
               sleep(5000)
               smartClick(textContains('直接签到').findOne(3000))
               sleep(1000)
 
-              // 再玩十局小游戏领金币
-              for (var i = 0; i < 10; i++) {
-                if (text('猫咪咖啡屋').exists()) {
-                  smartClick(text('猫咪咖啡屋').findOne(3000))
+              // 再玩十一局小游戏领金币(因为第一局有可能加载失败)
+              for (var i = 0; i < 11; i++) {
+                if (text('猫咪公寓').exists()) {
+                  smartClick(text('猫咪公寓').findOne(3000))
                   sleep(10000)
                   back()
                   smartClick(text('确定').findOne(3000))
@@ -339,6 +367,10 @@ function taoBaoQianDao() {
 
               storage.put('wanXiaoYouXiLastRanDate', new Date().getDate()) // 全部完成后才打卡
 
+            }
+            else {
+              toastLog('进入玩小游戏失败 可能未授权 重新载入主页面')
+              enterJinBiZhuangYuan()
             }
           } else {
             toast('未找到玩小游戏入口')
@@ -495,8 +527,15 @@ function taoBaoQianDao() {
               sleep(1000)
             } while (desc('签到+').exists())
 
-            storage.put('taoBaoQianDaoLastRanDate', new Date().getDate()) // 全部完成后才打卡
             toastLog('今日任务已完成')
+
+            sleep(1000)
+            toastLog('开始尝试三次领喵币')
+            lingMiaoBi()
+            lingMiaoBi()
+            lingMiaoBi()
+
+            storage.put('taoBaoQianDaoLastRanDate', new Date().getDate()) // 全部完成后才打卡
           }
         } else {
           toast('未找到今日任务入口')
@@ -511,7 +550,8 @@ function taoBaoQianDao() {
     }
     toast('淘宝签到已结束')
     sleep(2000)
-    shell('am force-stop com.taobao.taobao', true); // 关闭应用 shell命令需要root权限 无权限自动忽略
+    if (IsRooted)
+      shell('am force-stop com.taobao.taobao', true); // 关闭应用 shell命令需要root权限 无权限则会直接种植脚本
     home()
     sleep(1000)
     if (muteWhileRunning) {
@@ -523,7 +563,8 @@ function taoBaoQianDao() {
       }
     }
     if (isScreenNeedToBeLocked) {
-      KeyCode(26)
+      if (IsRooted)
+        KeyCode(26)
     }
     exit()
   }
@@ -616,7 +657,8 @@ function enterJinBiZhuangYuan() {
 
   if (currentActivity() != 'com.taobao.tao.TBMainActivity') {
     // 黑屏等特殊状况 重试一次
-    shell('am force-stop com.taobao.taobao', true) // 无root权限则无效
+    if (IsRooted)
+      shell('am force-stop com.taobao.taobao', true)
     home()
     sleep(5000)
     launchApp('手机淘宝')
@@ -635,10 +677,16 @@ function enterJinBiZhuangYuan() {
     sleep(1000)
   }
 
+  smartClick(desc('首页').findOne(1000))
+
   // 淘宝主页面点击淘金币
-  smartClick(desc('淘金币').findOne(5000))
+  smartClick(descContains('淘金币').findOne(5000))
   waitForActivity('com.taobao.browser.BrowserActivity')
   sleep(5000)
+  if (!textContains('超级抵钱').findOne(5000)) {
+    toastLog("failed to initialize within 5s")
+    sleep(10000)
+  }
 
   // 关弹窗
   if (text('取消').exists()) {
@@ -683,14 +731,115 @@ function enterJinBiZhuangYuan() {
     return enterJinBiZhuangYuan()
   }
 
+  if (textContains('立即签到').exists()) {
+    var p = textContains('立即签到').findOne(1000).bounds();
+    smartClick(textContains('立即签到').findOne(1000))
+    sleep(1000)
+    click(p.centerX(), p.centerY() - 0.114 * device.height())
+    sleep(1000)
+  }
+
+  if (textContains('今日金币未领取').exists()) {
+    smartClick(textContains('今日金币未领取').findOne(1000))
+    sleep(1000)
+    var p = textContains('立即签到').findOne(1000).bounds();
+    smartClick(textContains('立即签到').findOne(1000))
+    sleep(1000)
+    click(p.centerX(), p.centerY() - 0.114 * device.height())
+    sleep(1000)
+  }
+
   swipe(540, 500, 540, 1500, 500) // 下拉强制展开 
   sleep(2000)
-  var isLoadFinished = textContains('攻略').findOne(5000) // 借此判断是否加载完成
-  if (isLoadFinished)
+  if (isLoadFinished()) {
     toastLog('load finished')
-  else
+    return true
+  }
+  else {
     console.error('load failed')
-  return isLoadFinished
+    return false
+  }
 }
 
-// TODO  代码逻辑重构  确保在正确的页面对正确的控件进行操作
+function isLoadFinished() {
+  return textContains('超级抵钱').findOne(5000) // 借此判断是否加载完成
+}
+
+function lingMiaoBi() {
+  toastLog('开始领喵币')
+
+  try {
+    app.startActivity({
+      packageName: 'com.taobao.taobao',
+      className: 'com.taobao.tao.TBMainActivity'
+    })
+
+    // 等待主界面,最多等10s
+    for (var i = 0; i < 10; i++) {
+      if (currentActivity() != 'com.taobao.tao.TBMainActivity') {
+        smartClick(textContains('跳过').findOne(1000))
+        sleep(1000)
+      }
+    }
+
+    if (currentActivity() != 'com.taobao.tao.TBMainActivity') {
+      // 黑屏等特殊状况 重试一次
+      launchApp('手机淘宝')
+      sleep(10000)
+      if (currentActivity() != 'com.taobao.tao.TBMainActivity') {
+        console.error('failed to launch application')
+        toast('fatal error　: failed to launch application')
+        exit()
+      }
+    }
+    sleep(1000); // 延时 确保各控件弹窗等加载完成
+
+    // 防止更新等弹窗扰乱程序
+    if (text('取消').exists()) {
+      smartClick(text('取消').findOne(1000))
+      sleep(1000)
+    }
+
+    smartClick(desc('首页').findOne(1000))
+    sleep(1000)
+    var p = desc('主会场').findOne(1000).bounds()
+    click(p.centerX() + device.width / 2, p.centerY())
+    sleep(5000)
+    if (!text('待兑换红包').exists())
+      sleep(5000)
+    smartClick(textContains('收下').findOne(1000))
+    sleep(3000)
+    smartClick(textContains('上限').findOne(1000))
+    sleep(3000)
+    click(device.width * 0.85, 1750)
+    sleep(3000)
+  } catch (error) {
+    toastLog('自动打开界面出现错误 现在请手动打开')
+    sleep(2000)
+    toastLog('错误详情:' + error.message)
+  }
+
+  smartClick(text('签到').findOne(1000))
+  smartClick(desc('签到').findOne(1000))
+
+  for (var i = 0; i < 30 && text('去进店').exists(); i++) {
+    if (smartClick(text('去进店').findOne(1000))) {
+      sleep(3000)
+      swipe(540, 1500, 540, 500, 500)
+      sleep(18000)
+      back()
+      sleep(3000)
+    }
+  }
+
+  for (var i = 0; i < 30 && text('去浏览').exists(); i++) {
+    if (smartClick(text('去浏览').findOne(1000))) {
+      sleep(3000)
+      swipe(540, 1500, 540, 500, 500)
+      sleep(18000)
+      back()
+      sleep(3000)
+    }
+  }
+  toastLog('领喵币已结束')
+}

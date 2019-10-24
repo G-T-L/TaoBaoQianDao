@@ -1,10 +1,11 @@
 // 密码按照这个格式自行修改 
 //var password = [5, 9, 6, 2]
 var password = [4, 3, 5, 4, 3, 5]
-//const isRooted = true
 
 var deviceUnlocker = {}
 deviceUnlocker.unlockDevice = function () {
+  const IsRooted = files.exists("/sbin/su") || files.exists("/system/xbin/su") || files.exists("/system/bin/su")
+  log("Is Device Rooted:" + IsRooted)
   if (device.isScreenOn()) {
     sleep(3000) // 延时启动 方便调试
   }
@@ -23,21 +24,26 @@ deviceUnlocker.unlockDevice = function () {
       sleep(1000)
     }
 
-    //先假设有root权限,上滑到密码输入页
-    Swipe(540, 1800, 540, 300, 200) //上滑 大写为root函数 小写的swipe无法成功滑动  //米8为上滑  //当屏幕有干扰时(比如屏幕朝下放在床上等) 上滑会失败
-    //Swipe(200, 1000, 900, 1000, 200) //右滑
-    if (!desc(0).findOne(10000)) {
-      //如果失败 尝试另一种方式
-      // 非root模式 普通swipe下滑失效 采用下滑通知栏点击设置进入密码输入页面进行曲线解锁
+    if (IsRooted) {
+      Swipe(540, 1800, 540, 300, 200) //上滑 大写为root函数 小写的swipe无法成功滑动  //米8为上滑  //当屏幕有干扰时(比如屏幕朝下放在床上等) 上滑会失败
+      //Swipe(200, 1000, 900, 1000, 200) //右滑
+      sleep(1000)
+    }
+
+    if (!desc(0).findOne(2000) || IsRooted == false) {
+      //如果root方式失败 则也尝试非root方式 增强可靠性
+      //非root模式 由于普通swipe直接下滑无效 故采用下滑通知栏点击设置进入密码输入页面进行曲线解锁
       swipe(540, 10, 540, 1500, 600)
-      sleep(500) // 要等通知栏下滑加载完成后定位
-      if (desc('设置').exists())
+      sleep(1000) // 要等通知栏下滑加载完成后定位
+      if (desc('设置').exists()) {
         desc('设置').findOne(2000).click()
+      }
       else {
         log('warnning: find setting widget failed once')
+        sleep(1000) // 要等通知栏下滑加载完成后定位
         swipe(540, 10, 540, 1500, 200)
+        desc('设置').findOne(2000).click()
       }
-      desc('设置').findOne(2000).click()
     }
 
     //输入密码
