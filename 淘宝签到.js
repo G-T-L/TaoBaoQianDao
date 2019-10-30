@@ -548,6 +548,7 @@ function taoBaoQianDao() {
     } else {
       toastLog('今日任务已完成,无需重复')
     }
+    lingMiaoBi()
     toast('淘宝签到已结束')
     sleep(2000)
     if (IsRooted)
@@ -677,13 +678,15 @@ function enterJinBiZhuangYuan() {
     sleep(1000)
   }
 
-  smartClick(desc('首页').findOne(1000))
+  if (!descContains('金币庄园').exists())
+    smartClick(desc('首页').findOne(1000))
 
   // 淘宝主页面点击淘金币
-  smartClick(descContains('淘金币').findOne(5000))
+  smartClick(descContains('金币庄园').findOne(5000))
   waitForActivity('com.taobao.browser.BrowserActivity')
   sleep(5000)
-  if (!textContains('超级抵钱').findOne(5000)) {
+
+  if (!isLoadFinished()) {
     toastLog("failed to initialize within 5s")
     sleep(10000)
   }
@@ -735,7 +738,7 @@ function enterJinBiZhuangYuan() {
     var p = textContains('立即签到').findOne(1000).bounds();
     smartClick(textContains('立即签到').findOne(1000))
     sleep(1000)
-    click(p.centerX(), p.centerY() - 0.114 * device.height())
+    click(p.centerX(), p.centerY() + 0.114 * device.height)
     sleep(1000)
   }
 
@@ -745,7 +748,7 @@ function enterJinBiZhuangYuan() {
     var p = textContains('立即签到').findOne(1000).bounds();
     smartClick(textContains('立即签到').findOne(1000))
     sleep(1000)
-    click(p.centerX(), p.centerY() - 0.114 * device.height())
+    click(p.centerX(), p.centerY() + 0.114 * device.height)
     sleep(1000)
   }
 
@@ -800,19 +803,44 @@ function lingMiaoBi() {
       sleep(1000)
     }
 
-    smartClick(desc('首页').findOne(1000))
+    if (!descContains('金币庄园').exists())
+      smartClick(desc('首页').findOne(1000))
     sleep(1000)
-    var p = desc('主会场').findOne(1000).bounds()
-    click(p.centerX() + device.width / 2, p.centerY())
-    sleep(5000)
-    if (!text('待兑换红包').exists())
+    var p = desc('狂欢开场').findOne(1000)
+    if (p) {
+
+      click(p.bounds().centerX(), p.bounds().centerY() + 0.08 * device.height)
       sleep(5000)
-    smartClick(textContains('收下').findOne(1000))
-    sleep(3000)
-    smartClick(textContains('上限').findOne(1000))
-    sleep(3000)
-    click(device.width * 0.85, 1750)
-    sleep(3000)
+      if (!text('待兑换红包').exists())
+        sleep(5000)
+      smartClick(textContains('收下').findOne(1000))
+      sleep(3000)
+      smartClick(textContains('上限').findOne(1000))
+      sleep(3000)
+
+      if (textContains('翻倍').exists()) {
+        smartClick(textContains('翻倍').findOne(1000))
+        sleep(25000)
+        back()
+        sleep(3000)
+      }
+
+      if (textContains('队伍红包').exists()) {
+        smartClick(textContains('队伍红包').findOne(1000))
+        sleep(5000)
+        back()
+        sleep(3000)
+      }
+
+      click(device.width * 0.85, 1750)
+      sleep(3000)
+    }
+    else {
+      toastLog('入口定位失败')
+      sleep(2000)
+      toastLog('现在请手动打开 否则程序将自动退出')
+      sleep(10000)
+    }
   } catch (error) {
     toastLog('自动打开界面出现错误 现在请手动打开')
     sleep(2000)
@@ -841,5 +869,6 @@ function lingMiaoBi() {
       sleep(3000)
     }
   }
+
   toastLog('领喵币已结束')
 }
