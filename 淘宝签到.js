@@ -94,8 +94,7 @@ function taoBaoQianDao() {
       var point = findColor(captureScreen(), '#ff0084FE', {
         region: [200, 300, 600, 500]
       })
-      var count = 0
-      while (point && count++ < 3) {
+      for (var i = 0; i < 3 && point; i++) {
         toastLog('水滴已定位')
         click(point.x, point.y - 10)
         sleep(3000)
@@ -142,13 +141,13 @@ function taoBaoQianDao() {
       if (className('android.view.View').text('领水滴').exists()) {
         smartClick(text('打卡').findOne(1000))
         sleep(1000)
-        while (text('去逛逛').exists()) {
+        for (var i = 0; i < 5 && text('去逛逛').exists(); i++) {
           if (smartClick(text('去逛逛').findOne(1000))) {
             sleep(13000)
             back()
             sleep(3000)
           }
-        }
+        } 
         smartClick(text('关闭').findOne(1000))//关闭领水滴界面
         toastLog('领水滴已结束')
         sleep(3000)
@@ -166,13 +165,13 @@ function taoBaoQianDao() {
 
       //这个弹出界面不需要下拉显示出来就能索引到全部控件  故先把列表全部展开  再依次点击
       if (className('android.view.View').text('偷金币').exists()) {
-        while (textContains('个好友可偷金币').exists()) {
+        for (var i = 0; i < 10 && textContains('个好友可偷金币').exists(); i++) {
           smartClick(textContains('个好友可偷金币').findOne(2000))
           swipe(540, 1500, 540, 500, 500)
         }
 
         toastLog('开始浇水')
-        while (text('可浇水').exists()) {
+        for (var i = 0; i < 100 && text('可浇水').exists(); i++) {
           smartClick(text('可浇水').findOne(1000))
           sleep(5000)
           click(text('浇水').findOne(1000).bounds().centerX(), text('浇水').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
@@ -254,7 +253,7 @@ function taoBaoQianDao() {
         if (className('android.view.View').text('领肥料').exists()) {
           smartClick(text('打卡').findOne(1000))
           sleep(1000)
-          while (text('去逛逛').exists()) {
+          for (var i = 0; i < 10 && text('去逛逛').exists(); i++) {
             if (smartClick(text('去逛逛').findOne(1000))) {
               sleep(38000)
               back()
@@ -269,12 +268,12 @@ function taoBaoQianDao() {
         click(text('帮施肥').findOne(1000).bounds().centerX(), text('帮施肥').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
         sleep(3000)
         if (className('android.view.View').text('帮施肥').exists()) {
-          while (textContains('个好友可施肥').exists()) {
+          for (var i = 0; i < 10 && textContains('个好友可施肥').exists(); i++) {
             smartClick(textContains('个好友可施肥').findOne(2000))
             swipe(540, 1500, 540, 500, 500)
           }
 
-          while (text('去施肥').exists()) {
+          for (var i = 0; i < 100 && text('去施肥').exists(); i++) {
             smartClick(text('去施肥').findOne(1000))
             sleep(5000)
             click(text('施肥').findOne(1000).bounds().centerX(), text('施肥').findOne(1000).bounds().centerY())//用text定位后调用click点击不太稳定,不知道为啥
@@ -360,7 +359,7 @@ function taoBaoQianDao() {
                 smartClick(text('奖励已发放').findOne(3000))
               }
 
-              while (text('金币游戏').exists()) {
+              for (var i = 0; i < 10 && text('金币游戏').exists(); i++) {
                 back()
                 sleep(2000)
               }
@@ -423,7 +422,7 @@ function taoBaoQianDao() {
               desc('成就徽章').findOne(5000) // 以此为根据,等待页面加载
               sleep(1000)
 
-              while (desc('领取奖励').exists()) {
+              for (var i = 0; i < 100 && desc('领取奖励').exists(); i++) {
                 smartClick(desc('领取奖励').findOne(1000))
                 sleep(13000)
                 back()
@@ -461,7 +460,7 @@ function taoBaoQianDao() {
               smartClick(desc('领取奖励').findOne(5000))
               sleep(13000)
 
-              while (!desc('任务中心').exists()) {
+              for (var i = 0; i < 10 && !desc('任务中心').exists(); i++) {
                 back()
                 sleep(2000)
               }
@@ -503,7 +502,7 @@ function taoBaoQianDao() {
               }
             }
 
-            while (!desc('任务中心').exists()) {
+            for (var i = 0; i < 10 && !desc('任务中心').exists(); i++) {
               back()
               sleep(2000)
             }
@@ -511,8 +510,11 @@ function taoBaoQianDao() {
             // 好店签到
 
             swipe(500, 1500, 500, 300, 500) // 上滑手势 下拉列表 一开始就要下拉
+            for (var i = 0; i < 3 && !desc('签到+').exists(); i++) {
+              swipe(500, 1500, 500, 700, 500) // 上滑手势 下拉列表 一开始就要下拉
+            }
 
-            do {
+            for (var i = 0; i < 10 && desc('签到+').exists(); i++) {
               if (smartClick(desc('签到+').findOne(1000))) {
                 text('金币好店签到').findOne(10000) // some time it just took years to load
                 sleep(500)
@@ -525,7 +527,7 @@ function taoBaoQianDao() {
               }
 
               sleep(1000)
-            } while (desc('签到+').exists())
+            }
 
             toastLog('今日任务已完成')
 
@@ -806,10 +808,10 @@ function lingMiaoBi() {
     if (!descContains('金币庄园').exists())
       smartClick(desc('首页').findOne(1000))
     sleep(1000)
-    var p = desc('狂欢开场').findOne(1000)
+    var p = descContains('去主会场').findOne(1000)
     if (p) {
 
-      click(p.bounds().centerX(), p.bounds().centerY() + 0.08 * device.height)
+      click(p.bounds().centerX(), p.bounds().centerY() + 0.25 * device.height)
       sleep(5000)
       if (!text('待兑换红包').exists())
         sleep(5000)
