@@ -4,7 +4,7 @@
 // 系统安卓7及以上   
 // Auto.js 版本4.1及以上 否则部分函数无法运行
 // 依赖同路径下的 "解锁屏幕.js" 来在屏幕锁定时解锁屏幕
-// 更新日期:201909013
+// 更新日期:20200429
 // 如果脚本无法在后台申请截屏权限或无法在非主界面调用时弹出询问窗,请确保有后台弹出界面的权限
 // 脚本稳定性基于Auto.js 偶尔会出现找图找色失败而导致无法领取水滴,无法进入今日任务,玩小游戏等拓展频道领取金币 重启手机可解决
 // 多次运行可提升容错率
@@ -272,7 +272,7 @@ function enterJinBiZhuangYuan() {
     }
     var p = textContains('立即签到').findOne(1000).bounds();
     smartClick(textContains('立即签到').findOne(1000))
-    sleep(1000)
+    sleep(5000)
     //TODO test
     //点击右上角的关闭
     var p = textContains('签到').findOne(1000)

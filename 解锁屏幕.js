@@ -30,7 +30,7 @@ deviceUnlocker.unlockDevice = function () {
       sleep(1000)
     }
 
-    if (!desc(0).findOne(2000) || IsRooted == false) {
+    if (!desc(0).findOne(3000) || IsRooted == false) {
       //如果root方式失败 则也尝试非root方式 增强可靠性
       //非root模式 由于普通swipe直接下滑无效 故采用下滑通知栏点击设置进入密码输入页面进行曲线解锁
       swipe(540, 10, 540, 1500, 600)
@@ -42,13 +42,14 @@ deviceUnlocker.unlockDevice = function () {
         log('warnning: find setting widget failed once')
         sleep(1000) // 要等通知栏下滑加载完成后定位
         swipe(540, 10, 540, 1500, 200)
-        desc('设置').findOne(2000).click()
+        smartClick(desc('设置').findOne(2000))
+        sleep(3000)
       }
     }
 
     //输入密码
     for (var i = 0; i < password.length; i++) {
-      desc(password[i]).findOne(10000).click()
+      smartClick(desc(password[i]).findOne(1000))
     }
 
   }
@@ -73,6 +74,34 @@ deviceUnlocker.unlockDevice = function () {
     return false
   }
 
+}
+
+function smartClick(widget) {
+  if (widget) {
+    if (widget.clickable() && widget.className() != "android.widget.FrameLayout") {
+      widget.click()
+      return true
+    } else {
+      var widget_temp = widget.parent()
+      for (var triedTimes = 0; triedTimes < 5; triedTimes++) {
+        if (widget_temp.clickable()) {
+          widget_temp.click()
+          return true
+        }
+        widget_temp = widget_temp.parent()
+        if (!widget_temp) {
+          break
+        }
+      }
+
+      click(widget.bounds().centerX(), widget.bounds().centerY())
+      return true
+    }
+  } else {
+    // console.verbose('invalid widget')
+    console.trace('invalid widget : ')
+    return false
+  }
 }
 
 module.exports = deviceUnlocker
