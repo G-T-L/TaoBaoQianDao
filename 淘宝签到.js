@@ -265,9 +265,9 @@ function enterJinBiZhuangYuan() {
     sleep(1000)
   }
 
-  if (textContains('今日金币未领取').exists()) {
+  if (text(new Date().getDate()).exists()) {
     if (!textContains('立即签到').exists()) {
-      smartClick(textContains('今日金币未领取').findOne(1000))
+      smartClick(text(new Date().getDate()).findOne(1000))
       sleep(3000)
     }
     var p = textContains('立即签到').findOne(1000).bounds();
@@ -391,10 +391,26 @@ function collectWater() {
   if (className('android.view.View').textContains('领水滴').exists()) {
     smartClick(text('一键领取').findOne(1000))
     sleep(1000)
-    for (var i = 0; i < 5 && text('去完成').exists(); i++) {
-      if (smartClick(text('去完成').findOne(1000))) {
-        sleep(15000)
 
+    //去逛逛的任务应该较不容易出错,先完成
+    for (var i = 0; i < 10 && text('去逛逛').exists(); i++) {
+      if (smartClick(text('去逛逛').findOne(1000))) {
+        toastLog('去逛逛任务尝试次数:' + (i + 1) + '/10')
+        sleep(5000)
+        swipe(540, 1500, 540, 500, 500)
+        sleep(20000)
+        back()
+        sleep(3000)
+      }
+    }
+
+    for (var i = 0; i < 10 && text('去完成').exists(); i++) {
+      if (smartClick(text('去完成').findOne(1000))) {
+        sleep(5000)
+        swipe(540, 1500, 540, 500, 500)
+        sleep(20000)
+
+        toastLog('去完成任务尝试次数:' + (i + 1) + '/10')
         if (text('拍立淘').exists())
           coinTask_Photo()
         if (id('searchEdit').exists())
@@ -402,22 +418,15 @@ function collectWater() {
         if (desc('进群打卡领金币').exists())
           coinTask_ClockIn()
 
-        for (var i = 0; i < 10 && !className('android.view.View').textContains('领水滴').exists(); i++) {
+        //下面这个for循环也用i将改变当前for循环的i
+        for (var j = 0; j < 10 && !className('android.view.View').textContains('领水滴').exists(); j++) {
           back()
           sleep(2000)
         }
         sleep(3000)
       }
     }
-    for (var i = 0; i < 5 && text('去逛逛').exists(); i++) {
-      if (smartClick(text('去逛逛').findOne(1000))) {
-        sleep(3000)
-        swipe(540, 1500, 540, 500, 500)
-        sleep(15000)
-        back()
-        sleep(3000)
-      }
-    }
+
     smartClick(text('一键领取').findOne(1000))
     sleep(1000)
     smartClick(text('关闭').findOne(1000))//关闭领水滴界面
